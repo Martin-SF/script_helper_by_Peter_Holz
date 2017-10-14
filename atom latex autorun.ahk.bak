@@ -57,7 +57,7 @@ return
 ; SHORTCUT UM PDF ZU ÖFFNEN
 
 ^5::
-open_c("sumatra",)
+open_c("sumatra",0)
 return
 
 ~f5:: ;f5 nicht blockieren
@@ -124,7 +124,7 @@ run_line() {
 	WinGetTitle, title, A
 	len_a := InStr(title, scriptpath)
 	
-	SendInput cd %scriptpath%{enter} ;nur wenn im title von conemu nicht ath steht ; CONEMU MIT STARTPARAM ÖFFNEN
+	SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ; CONEMU MIT STARTPARAM ÖFFNEN
 	
 	SendInput %scripttype% %scriptname%{enter}
 	

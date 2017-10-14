@@ -124,7 +124,7 @@ run_line() {
 	WinGetTitle, title, A
 	len_a := InStr(title, scriptpath)
 	
-	SendInput cd %scriptpath%{enter} ;nur wenn im title von conemu nicht ath steht ; CONEMU MIT STARTPARAM ÖFFNEN
+	SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ; CONEMU MIT STARTPARAM ÖFFNEN
 	
 	SendInput %scripttype% %scriptname%{enter}
 	
@@ -145,12 +145,14 @@ open_c(program,path) {
 	process, exist, %programexe%
 	if (errorlevel=0) {
 		run, %programpathexe%
+		WinWaitActive, ahk_exe %programexe%
+		if (program = "conemu") 
+		sleep conemu_ms ;warten bis command line da ist
 	} else {
 		WinActivate, ahk_exe %programexe% ;TIMEOUTS
+		WinWaitActive, ahk_exe %programexe%
 	}
-	WinWaitActive, ahk_exe %programexe%
-	if (program = "conemu") 
-		sleep conemu_ms ;warten bis command line da ist
+	
 	
 }
 
