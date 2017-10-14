@@ -147,7 +147,7 @@ open_c(program,path) {
 		run, %programpathexe%
 		WinWaitActive, ahk_exe %programexe%
 		if (program = "conemu") 
-		sleep conemu_ms ;warten bis command line da ist
+			sleep conemu_ms ;warten bis command line da ist
 	} else {
 		WinActivate, ahk_exe %programexe% ;TIMEOUTS
 		WinWaitActive, ahk_exe %programexe%
