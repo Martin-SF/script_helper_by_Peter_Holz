@@ -1,8 +1,8 @@
-ï»¿#NoEnv
+#NoEnv
 SetBatchLines -1
 ListLines Off
 
-sendmode input ;schnelligkeit erhÃ¶hen
+sendmode input ;schnelligkeit erhöhen
 SetWinDelay -1
 SetControlDelay -1
 SetMouseDelay -1
@@ -23,7 +23,7 @@ check_program_availability(){
 		conemupathexe := "e:\Programme\Tools\Toolbox_programs\ConEmu\ConEmu64.exe" ;"C:\Program Files\ConEmu\ConEmu64.exe"
 			IfnotExist, %conemupathexe% 
 				InputBox, conemupathexe , type in your conemu64.exe path it wasnt found in \program files `n(with conemu64.exe at the end), , , 400, 120, , , , , %conemupathexe%
-			; STABILE LÃ–SUNG NÃ–TIG
+			; STABILE LÖSUNG NÖTIG
 	} else {
 		msgbox 32-bit not supported contact peter.holz@hotmail.de for support reqeust`n`nProgram will exit now
 		exitapp
@@ -54,7 +54,7 @@ IfMsgBox, Yes
 	exitapp
 return
 
-; SHORTCUT UM PDF ZU Ã–FFNEN / entsprechende pdf
+; SHORTCUT UM PDF ZU ÖFFNEN / entsprechende pdf
 ^5:: ;GEHT NICHT
 open_c("sumatra",0)
 return
@@ -64,7 +64,7 @@ return
 		return
 	
 	;mehrere texteditoren durchgehen dementsprechend filepath getten modifizieren
-	;die entsprechende methode uma alle paramater zu bekommen abhÃ¤ngig vom texteditor machen
+	;die entsprechende methode uma alle paramater zu bekommen abhängig vom texteditor machen
 
 	keys_save_texteditor()
 	
@@ -84,7 +84,7 @@ run_line() {
 	WinGetTitle, title, A
 	
 	;FoundPos := InStr(Haystack, Needle [, CaseSensitive = false, StartingPos = 1, Occurrence = 1])
-	len_a := InStr(title, " â€” " )
+	len_a := InStr(title, " — " )
 	
 	;NewStr := SubStr(String, StartingPos [, Length])
 	scriptname := SubStr(title, 1 , Len_a-1)
@@ -126,7 +126,7 @@ run_line() {
 	WinGetTitle, title, A
 	len_a := InStr(title, scriptpath)
 	
-	SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ; CONEMU MIT STARTPARAM Ã–FFNEN
+	SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ; CONEMU MIT STARTPARAM ÖFFNEN
 	
 	SendInput %scripttype% %scriptname%{enter}
 	
@@ -134,7 +134,7 @@ run_line() {
 
 open_c(program,path) {
 	
-	global ;programme starparam Ã¼bergeben : path 
+	global ;programme starparam übergeben : path 
 	
 	if (program = "conemu") {
 		programexe := conemuexe
@@ -157,6 +157,12 @@ open_c(program,path) {
 	
 	
 }
+
+
+
+
+
+
 
 keys_save_texteditor() {
 	global
