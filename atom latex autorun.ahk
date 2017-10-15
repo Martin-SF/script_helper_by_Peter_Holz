@@ -54,15 +54,17 @@ IfMsgBox, Yes
 	exitapp
 return
 
-; SHORTCUT UM PDF ZU ÖFFNEN
-
-^5::
+; SHORTCUT UM PDF ZU ÖFFNEN / entsprechende pdf
+^5:: ;GEHT NICHT
 open_c("sumatra",0)
 return
 
 ~f5:: ;f5 nicht blockieren
-	if (winactive("ahk_exe atom.exe")=false)
+	if (winactive("ahk_exe atom.exe")=false) 
 		return
+	
+	;mehrere texteditoren durchgehen dementsprechend filepath getten modifizieren
+	;die entsprechende methode uma alle paramater zu bekommen abhängig vom texteditor machen
 
 	keys_save_texteditor()
 	
@@ -132,7 +134,7 @@ run_line() {
 
 open_c(program,path) {
 	
-	global ;path als starting dir benutzen
+	global ;programme starparam übergeben : path 
 	
 	if (program = "conemu") {
 		programexe := conemuexe
