@@ -156,6 +156,7 @@ run_line() {
 	
 	SendInput %scripttype% %scriptname%{enter}
 	
+	
 }
 
 open_c(program,path) {
