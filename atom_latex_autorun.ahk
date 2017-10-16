@@ -20,7 +20,8 @@ check_program_availability(){
 	; CONEMU	
 	if (A_Is64bitOS=1) {
 		conemuexe := "conemu64.exe"
-		conemupathexe := "e:\Programme\Tools\Toolbox_programs\ConEmu\ConEmu64.exe" ;"C:\Program Files\ConEmu\ConEmu64.exe"
+		;conemupathexe := "e:\Programme\Tools\Toolbox_programs\ConEmu\ConEmu64.exe" 
+		conemupathexe := "C:\Program Files\ConEmu\ConEmu64.exe"
 			IfnotExist, %conemupathexe% 
 				InputBox, conemupathexe , type in your conemu64.exe path it wasnt found in \program files `n(with conemu64.exe at the end), , , 400, 120, , , , , %conemupathexe% 
 			; STABILE LÖSUNG NÖTIG
@@ -31,12 +32,14 @@ check_program_availability(){
 	}
 
 	;atom
-
+	
+	;npp
 
 	;sumatra
 
 	sumatraexe := "SumatraPDF.exe"
 	sumatrapathexe := "e:\Programme\Tools\Toolbox_programs\SumatraPDF\SumatraPDF.exe"
+	sumatrapathexe := "C:\Program Files\SumatraPDF\SumatraPDF.exe"
 	IfnotExist, %sumatrapathexe% 
 		InputBox, sumatrapathexe , type in your sumatra path it wasnt found in \program files `n(with conemu64.exe at the end), , , 200, 120, , , , , %sumatrapathexe%
 
@@ -60,7 +63,7 @@ open_c("sumatra",0)
 return
 
 ~f5:: ;f5 nicht blockieren
-	if (winactive("ahk_exe atom.exe")=false) 
+	if ( !winactive("ahk_exe atom.exe") and !winactive("ahk_exe notepad++.exe") ) 
 		return
 	
 	;mehrere texteditoren durchgehen dementsprechend filepath getten modifizieren
@@ -83,11 +86,34 @@ run_line() {
 	
 	WinGetTitle, title, A
 	
-	;FoundPos := InStr(Haystack, Needle [, CaseSensitive = false, StartingPos = 1, Occurrence = 1])
-	len_a := InStr(title, " — " )
+	;atom oder notepad?
 	
-	;NewStr := SubStr(String, StartingPos [, Length])
-	scriptname := SubStr(title, 1 , Len_a-1)
+	;FoundPos := InStr(Haystack, Needle [, CaseSensitive = false, StartingPos = 1, Occurrence = 1])
+	if (winactive("ahk_exe atom.exe")!=0) {
+		;msgbox 3
+		len_a := InStr(title, " — " )
+		
+		;NewStr := SubStr(String, StartingPos [, Length])
+		scriptname := SubStr(title, 1 , Len_a-1)
+	}
+	else if (winactive("ahk_exe notepad++.exe")!=0) {
+		;msgbox 12
+		keys_close_run_npp()
+		;ControlSend, Edit1, {Alt down}f{Alt up}, Untitled - Notepad
+		
+		;sleep 500
+		t1 := title
+		while (title<=20) 
+			WinGetTitle, title, A
+		;C:\Users\m7fel\CloudStation\C++ & AHK Projekte\Autohotkey\Skripte und Programme\sonstige Projekte\atom comemu atom\atom_latex_autorun.ahk - Notepad++
+		len_a := InStr(title, " - " )
+		len_b := InStr(title, "\" ,,StartingPos = 0)
+		scriptname := SubStr(title, len_b+1 , Len_a-3)
+		msgbox, % scriptname 
+	} else {
+		msgbox, % title
+		ExitApp
+	}
 	
 	if (InStr(scriptname, ".tex"))
 		scripttype := "lualatex"
@@ -156,6 +182,21 @@ open_c(program,path) {
 	}
 	
 	
+}
+
+keys_close_run_npp() {
+	
+	sendinput {tab down}
+	sendinput {tab up}
+	
+	sendinput {tab down}
+	sendinput {tab up}
+	
+	sendinput {tab down}
+	sendinput {tab up}
+	
+	Sendinput {enter down}
+	Sendinput {enter up}
 }
 
 keys_save_texteditor() {
