@@ -214,7 +214,7 @@ keys_get_filedest(shortcut_ms) {
 write_std_settings(n) {
 	std_shortcut_waittime := 100
 	std_conemu_waittime := 5000
-	std_conemupathexe := "C:\Program Files\ConEmuu\ConEmu64.exe"
+	std_conemupathexe := "C:\Program Files\ConEmu\ConEmu64.exe"
 	std_sumatrapathexe := "C:\Program Files\SumatraPDF\SumatraPDF.exe"
 
 	if (n=1 or n=0)
