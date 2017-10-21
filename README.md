@@ -2,10 +2,12 @@
 Script Helper for several Notepad apps (right now only atom).
 written in Autohotkey by Peter Holz.
 
-Usage:
+Hotkeys:
 
-F5 - run opened script of atom (lualatex and python supported)
+F5          - run opened script of "currently active" notepad app in Conemu (lualatex and python supported)
+Crtl + 4    - Show program variables (for debugging)
+Crtl + 5    - open sumatrPDF
+crtl + F6   - close program
 
-crtl & F6 - close program
-
-peter.holz@hotmail.de
+contact: peter.holz@hotmail.de
+donations: paypal.me/peterholz1
