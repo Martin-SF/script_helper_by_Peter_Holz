@@ -45,7 +45,7 @@ return
 	try 
 		run_line()
 	catch e
-		MsgBox % "Error in " e.What ", which was called at line " e.Line "`n`nPlease contact peter.holz@hotmail.de with this error! (unless you did not configured the program wrong) `n`n " Errorlevel
+		MsgBox % e.message "`n`nError in " e.What ", which was called at line " e.Line "`nPlease contact peter.holz@hotmail.de with this error! (unless you did not configured the program wrong)"
 
 return
 
@@ -62,7 +62,6 @@ run_line() {
 	;atom oder notepad?
 	
 	if (winactive("ahk_exe atom.exe")!=0) {
-		;msgbox 3
 		len_a := InStr(title, " — " )
 		
 		;NewStr := SubStr(String, StartingPos [, Length])
@@ -71,7 +70,6 @@ run_line() {
 	else if (winactive("ahk_exe notepad++.exe")!=0) {
 		msgbox notepad++.exe not supported yet!
 		return
-		;msgbox 12
 		keys_close_run_npp()
 		;ControlSend, Edit1, {Alt down}f{Alt up}, Untitled - Notepad
 		
@@ -116,10 +114,8 @@ get_scripttype(scriptname) {
 		return "lualatex"
 	else if (InStr(scriptname, ".py"))
 		return "python"
-	else {
-		msgbox script type not supported!`n`nonly .py (python) and .tex (latex)
-		throw Exception("script type not supported!", -1)
-	}
+	else 
+		throw Exception("script type not supported!`n`nonly .py (python) and .tex (latex)")
 }
 
 open_c(program,path) {
@@ -138,7 +134,7 @@ open_c(program,path) {
 		programexe := sumatraexe
 		programpathexe := sumatrapathexe
 	} else 
-		throw Exception("unspecified program used in variable", -1)
+		throw Exception("unspecified program TRIED TO OPEN", -1)
 
 	process, exist, %programexe%
 	if (errorlevel=0) {
@@ -152,10 +148,8 @@ open_c(program,path) {
 			while (title = "ConEmu 170910 [64]" or title = "conemu-msys2-64") {
 				WinGetTitle, title, A
 				;sleep 50
-				if (A_TickCount-c>=conemu_ms) { ;if (A_TickCount-c>=conemu_ms) {
-					msgbox your pc is very slow. increase conemu_waittime!
-					throw Exception("conemu time to low", -1) ;message wird nicht im enddialog benutzt ändern
-				}
+				if (A_TickCount-c>=conemu_ms)  ;if (A_TickCount-c>=conemu_ms) {
+					throw Exception("your pc is very slow. increase conemu_waittime!") ;message wird nicht im enddialog benutzt ändern
 			}
 		}
 	} 
@@ -173,10 +167,7 @@ get_scriptfullpath_for_atom() {
 	keys_get_filedest(shortcut_ms)
 	ClipWait, 1
 	if ErrorLevel
-	{
-		MsgBox, clipboard error
-		return
-	}
+		throw Exception("clipboard error")
 	scriptfullpath := Clipboard
 	
 	Clipboard := clip
@@ -283,10 +274,8 @@ check_program_availability(){
 		}
 		conemuexe := SubStr(conemupathexe, InStr(conemupathexe, "\", false, 0, 1)+1 , strlen(conemupathexe))
 
-	} else {
-		msgbox 32-bit not supported contact peter.holz@hotmail.de for support request`n`nProgram will exit now
-		exitapp
-	}
+	} else
+		throw Exception("32-bit not supported contact peter.holz@hotmail.de for support request`n`nProgram will exit now")
 		
 	;sumatra
 
