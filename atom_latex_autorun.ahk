@@ -1,5 +1,5 @@
 ﻿#NoEnv
-#SingleInstance, force
+#SingleInstance force
 SetBatchLines -1
 ListLines Off
 ; #Warn  ; Enable warnings to assist with detecting common errors.
@@ -45,7 +45,7 @@ return
 	try 
 		run_line()
 	catch e
-		MsgBox % "Error in " e.What ", which was called at line " e.Line "`n`nPlease contact peter.holz@hotmail.de with this error! (unless you did not configured the program wrong)"
+		MsgBox % "Error in " e.What ", which was called at line " e.Line "`n`nPlease contact peter.holz@hotmail.de with this error! (unless you did not configured the program wrong) `n`n " Errorlevel
 
 return
 
