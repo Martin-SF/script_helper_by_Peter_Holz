@@ -39,7 +39,7 @@ return
 		return
 	}
 	;mehrere texteditoren durchgehen dementsprechend filepath getten modifizieren
-	;die entsprechende methode uma alle paramater zu bekommen abhängig vom texteditor machen
+	;die entsprechende methode um alle paramater zu bekommen abhängig vom texteditor machen
 
 	
 	try 
@@ -57,10 +57,28 @@ run_line() {
 	
 	keys_save_texteditor(shortcut_ms)
 	
+	scriptname := get_scriptname() ;erkennung für notepad ++ nicht fertig run_line nur für atom ausgelegt
+	scriptfullpath := get_scriptfullpath_atom()
+	StringReplace, scriptfullpath, scriptfullpath, \,/ , All
+	scriptpath := SubStr(scriptfullpath, 1 , InStr(scriptfullpath, scriptname)-2)
+
+	open_c("conemu",scriptpath)
+	
+	StringReplace, scriptpath, scriptpath, :, , All
+	scriptpath := "/" + scriptpath
+	if (WinGetActiveTitle() != scriptpath) ;FRAGEN OB WECHSELN ODER NICHT?
+		SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ;scriptname := % """" scriptpath "/" scriptname """"
+	
+	scripttype := get_scripttype(scriptname)
+	SendInput %scripttype% %scriptname%{enter}
+}
+WinGetActiveTitle() {
+	WinGetActiveTitle, out
+	return out
+}
+
+get_scriptname() {
 	WinGetTitle, title, A
-	
-	;atom oder notepad?
-	
 	if (winactive("ahk_exe atom.exe")!=0) {
 		len_a := InStr(title, " — " )
 		
@@ -87,26 +105,7 @@ run_line() {
 		return
 		ExitApp
 	}
-	
-
-	
-	
-	scriptfullpath := get_scriptfullpath_for_atom()
-	StringReplace, scriptfullpath, scriptfullpath, \,/ , All
-		
-	scriptpath := SubStr(scriptfullpath, 1 , InStr(scriptfullpath, scriptname)-2)
-
-	open_c("conemu",scriptpath)
-	
-	StringReplace, scriptpath, scriptpath, :, , All
-	scriptpath := "/" + scriptpath
-	
-	WinGetTitle, title, A
-	if (title != scriptpath) ;FRAGEN OB WECHSELN ODER NICHT?
-		 SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ;scriptname := % """" scriptpath "/" scriptname """"
-	
-	scripttype := get_scripttype(scriptname)
-	SendInput %scripttype% %scriptname%{enter}
+	return scriptname
 }
 
 get_scripttype(scriptname) {
@@ -129,13 +128,13 @@ open_c(program,path) {
 		
 		;programpathexe := % conemupathexe . " -""" . path . """"
 		programpathexe := % conemupathexe . " -here /single -run {Bash::Msys2-64}"
-
+		
 	} else if (program = "sumatra") {
 		programexe := sumatraexe
 		programpathexe := sumatrapathexe
 	} else 
 		throw Exception("unspecified program TRIED TO OPEN", -1)
-
+		
 	process, exist, %programexe%
 	if (errorlevel=0) {
 		run, %programpathexe%
@@ -149,10 +148,10 @@ open_c(program,path) {
 				WinGetTitle, title, A
 				;sleep 50
 				if (A_TickCount-c>=conemu_ms)  ;if (A_TickCount-c>=conemu_ms) {
-					throw Exception("your pc is very slow. increase conemu_waittime!") ;message wird nicht im enddialog benutzt ändern
+					throw Exception("your pc is very slow. increase conemu_waittime! (in optionsv2.ini") ;message wird nicht im enddialog benutzt ändern
 			}
 		}
-	} 
+	}
 	
 	WinActivate, ahk_exe %programexe% ;TIMEOUTS
 	WinWaitActive, ahk_exe %programexe%
@@ -160,7 +159,7 @@ open_c(program,path) {
 	SetWorkingDir %A_ScriptDir%
 }
 
-get_scriptfullpath_for_atom() {
+get_scriptfullpath_atom() {
 	clip := Clipboard
 	
 	clipboard = ; Empty the clipboard
@@ -208,6 +207,7 @@ keys_get_filedest(shortcut_ms) {
 }
 
 write_std_settings(n) {
+	
 	std_shortcut_waittime := 100
 	std_conemu_waittime := 5000
 	std_conemupathexe := "C:\Program Files\ConEmu\ConEmu64.exe"
@@ -218,16 +218,11 @@ write_std_settings(n) {
 	if (n=2 or n=0)
 		iniwrite, %std_conemu_waittime%, optionsv2.ini, settings, conemu_waittime
 	
-	;iniwrite, "C:\Program Files\ConEmu\ConEmu64.exe", optionsv2.ini, settings, conemu64_path_exe
-	;conemupathexe := "e:\Programme\Tools\Toolbox_programs\ConEmu\ConEmu64.exe" 
 	if (n=3 or n=0)
 		iniwrite, %std_conemupathexe%, optionsv2.ini, settings, conemu64_path_exe
 	
-	;iniwrite, "C:\Program Files\SumatraPDF\SumatraPDF.exe", optionsv2.ini, settings, SumatraPDF_path_exe
-	;sumatrapathexe := "e:\Programme\Tools\Toolbox_programs\SumatraPDF\SumatraPDF.exe"
 	if (n=4 or n=0)
 		iniwrite, %std_sumatrapathexe%, optionsv2.ini, settings, SumatraPDF_path_exe
-	
 }
 
 settingsread() {
@@ -239,55 +234,47 @@ settingsread() {
 	iniread, conemupathexe, optionsv2.ini, settings, conemu64_path_exe
 	iniread, sumatrapathexe, optionsv2.ini, settings, SumatraPDF_path_exe
 	
-	
-	check_program_availability()
-	if (err_check_program_availability=1) {
+	if (check_program_availability()=false) {
 		iniwrite, %conemupathexe%, optionsv2.ini, settings, conemu64_path_exe
 		iniwrite, %sumatrapathexe%, optionsv2.ini, settings, SumatraPDF_path_exe
 	}
 	
-	iniread, shortcut_ms, optionsv2.ini ,settings , shortcut_waittime, ERR ;generelle funktion ür iniread mit entsprechendem fehler
-	if (p = "ERR") ;try und catch benutzen
+	iniread, shortcut_ms, optionsv2.ini ,settings , shortcut_waittime ;generelle funktion ür iniread mit entsprechendem fehler
+	if (shortcut_ms = "ERROR")
 		write_std_settings(1)
 
-	iniread, conemu_ms, optionsv2.ini ,settings , conemu_waittime, ERR
-	if (p = "ERR") 
+	iniread, conemu_ms, optionsv2.ini ,settings , conemu_waittime
+	if (conemu_ms = "ERROR") 
 		write_std_settings(2)
 	
-	;DEBUG VALUES
-
 }
 
-check_program_availability(){
+check_program_availability() {
 	global
 	
+	boo := false
 	; CONEMU	
-	if (A_Is64bitOS=1) {
-		if !FileExist(conemupathexe) { ;TRY benutzen für fehler in general
-			err_check_program_availability = 1
-			;über WinGet, OutputVar [, Cmd, WinTitle, WinText, ExcludeTitle, ExcludeText] mit cmd := processname einfach auffordern conemu und sumatra einmal zu starten (wenn schon aktiv silent den processpath retrieven
-			;InputBox, conemupathexe , type in your full ConEmu64.exe path. It wasnt found., , , 800, 120, , , , , %conemupathexe% 
-			
-			;FileSelectFile, OutputVar [, Options, RootDir\Filename, select your ConEmu64.exe path., Executables (*.exe)]
-			MsgBox, 32, , Please select the conemu64.exe path. `n`n(it will show a window after clicking ok)
-			FileSelectFile, conemupathexe, 1,  %conemupathexe% , select your ConEmu64.exe path., Executables (*.exe)
-		}
-		conemuexe := SubStr(conemupathexe, InStr(conemupathexe, "\", false, 0, 1)+1 , strlen(conemupathexe))
-
-	} else
+	if (A_Is64bitOS=0) 
 		throw Exception("32-bit not supported contact peter.holz@hotmail.de for support request`n`nProgram will exit now")
 		
-	;sumatra
+	if !FileExist(conemupathexe) { ;TRY benutzen für fehler in general
+		boo := false
+		;über WinGet, OutputVar [, Cmd, WinTitle, WinText, ExcludeTitle, ExcludeText] mit cmd := processname einfach auffordern conemu und sumatra einmal zu starten (wenn schon aktiv silent den processpath retrieven
+		MsgBox, 32, , Please select the conemu64.exe path. `n`n(it will show a window after clicking ok)
+		FileSelectFile, conemupathexe, 1,  %conemupathexe% , select your ConEmu64.exe path., Executables (*.exe)
+	}
+	conemuexe := SubStr(conemupathexe, InStr(conemupathexe, "\", false, 0, 1)+1 , strlen(conemupathexe))
 
-	while !FileExist(sumatrapathexe) {
-		;InputBox, sumatrapathexe , type in your full sumatra.exe path. It wasnt found., , , 600, 120, , , , , %sumatrapathexe%
-		err_check_program_availability = 1
-		MsgBox, 32, , Please select the sumatra.exe path. `n`n(it will show a window after clicking ok)
-			FileSelectFile, conemupathexe, 1, %sumatrapathexe% , select your sumatra.exe path., Executables (*.exe)
+	;sumatra
+	if !FileExist(sumatrapathexe) {
+		boo := false
+		MsgBox, 32, , Please select the sumatraPDF.exe path. `n`n(it will show a window after clicking ok)
+		FileSelectFile, sumatrapathexe, 1, %sumatrapathexe% , select your sumatraPDF.exe path., Executables (*.exe)
 	}
 	sumatraexe := SubStr(sumatrapathexe, InStr(sumatrapathexe, "\", false, 0, 1)+1 , strlen(sumatrapathexe))
 		
-			;atom
+	;atom
 	
 	;npp
+	return boo
 }
