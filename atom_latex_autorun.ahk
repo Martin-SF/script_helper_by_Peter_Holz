@@ -2,6 +2,10 @@
 #SingleInstance, force
 SetBatchLines -1
 ListLines Off
+; #Warn  ; Enable warnings to assist with detecting common errors.
+SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+
 
 sendmode input ;schnelligkeit erhöhen
 SetWinDelay -1
@@ -101,7 +105,7 @@ run_line() {
 	
 	WinGetTitle, title, A
 	if (title != scriptpath) ;FRAGEN OB WECHSELN ODER NICHT?
-		scriptname := % """" scriptpath "/" scriptname """" ;SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht
+		 SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ;scriptname := % """" scriptpath "/" scriptname """"
 	
 	scripttype := get_scripttype(scriptname)
 	SendInput %scripttype% %scriptname%{enter}
@@ -158,6 +162,7 @@ open_c(program,path) {
 	
 	WinActivate, ahk_exe %programexe% ;TIMEOUTS
 	WinWaitActive, ahk_exe %programexe%
+	sleep 100 ;custom sleep für ini
 	SetWorkingDir %A_ScriptDir%
 }
 
