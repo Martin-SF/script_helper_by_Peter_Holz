@@ -66,11 +66,12 @@ run_line() {
 	
 	StringReplace, scriptpath, scriptpath, :, , All
 	scriptpath := "/" + scriptpath
+	;error wenn fenster gewechselt wurde
 	if (WinGetActiveTitle() != scriptpath) ;FRAGEN OB WECHSELN ODER NICHT?
 		SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ;scriptname := % """" scriptpath "/" scriptname """"
 	
 	scripttype := get_scripttype(scriptname)
-	SendInput %scripttype% %scriptname%{enter}
+	SendInput %scripttype% %scriptname%{enter} ;eventl diesen befehl beim starten von conemu als parameter übergeben
 }
 WinGetActiveTitle() {
 	WinGetActiveTitle, out
@@ -121,7 +122,7 @@ open_c(program,path) {
 	
 	global ;programme starparam übergeben : path 
 	
-	SetWorkingDir, %path%
+	;SetWorkingDir, %path%
 	
 	if (program = "conemu") {
 		programexe := conemuexe
@@ -137,7 +138,7 @@ open_c(program,path) {
 		
 	process, exist, %programexe%
 	if (errorlevel=0) {
-		run, %programpathexe%
+		run, %programpathexe%, %path%
 		WinWaitActive, ahk_exe %programexe%
 		
 		if (program = "conemu") {
@@ -155,8 +156,8 @@ open_c(program,path) {
 	
 	WinActivate, ahk_exe %programexe% ;TIMEOUTS
 	WinWaitActive, ahk_exe %programexe%
-	sleep 100 ;custom sleep für ini
-	SetWorkingDir %A_ScriptDir%
+	;sleep 100 ;custom sleep für ini
+	;SetWorkingDir %A_ScriptDir%
 }
 
 get_scriptfullpath_atom() {
