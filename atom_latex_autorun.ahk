@@ -165,7 +165,7 @@ get_scriptfullpath_atom() {
 	
 	clipboard = ; Empty the clipboard
 	keys_get_filedest(shortcut_ms)
-	ClipWait, 1
+	ClipWait, 3
 	if ErrorLevel
 		throw Exception("clipboard error")
 	scriptfullpath := Clipboard
@@ -189,19 +189,19 @@ keys_close_run_npp() {
 	Sendinput {enter up}
 }
 
-keys_save_texteditor(shortcut_ms) {
+keys_save_texteditor(ms) {
 	sendinput {Lcontrol down}
 	sendinput {s down}
-	sleep shortcut_ms
+	sleep ms
 	sendinput {s up}
 	sendinput {lcontrol up}
 }
 
-keys_get_filedest(shortcut_ms) {
+keys_get_filedest(ms) {
 	sendinput {Lcontrol down}
 	sendinput {shift down}
 	sendinput {c down}
-	sleep shortcut_ms
+	sleep ms
 	sendinput {c up}
 	sendinput {shift up}
 	sendinput {lcontrol up}
