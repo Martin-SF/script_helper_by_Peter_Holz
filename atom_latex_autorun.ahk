@@ -253,7 +253,7 @@ settingsread() {
 check_program_availability() {
 	global
 	
-	boo := false
+	boo := true
 	; CONEMU	
 	if (A_Is64bitOS=0) 
 		throw Exception("32-bit not supported contact peter.holz@hotmail.de for support request`n`nProgram will exit now")
