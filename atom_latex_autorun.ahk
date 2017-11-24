@@ -2,16 +2,20 @@
 #SingleInstance force
 SetBatchLines -1
 ListLines Off
-; #Warn  ; Enable warnings to assist with detecting common errors.
+#Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-
 
 sendmode input ;schnelligkeit erhöhen
 SetWinDelay -1
 SetControlDelay -1
 SetMouseDelay -1
 SetDefaultMouseSpeed, 0
+
+version := 1.0.8
+inipath := A_AppData "\script_helper\"
+FileCreateDir, %inipath%
+SetWorkingDir, %inipath%
+inifile := "optionsv2.ini"
 
 settingsread()
 return
@@ -40,12 +44,16 @@ return
 	}
 	;mehrere texteditoren durchgehen dementsprechend filepath getten modifizieren
 	;die entsprechende methode um alle paramater zu bekommen abhängig vom texteditor machen
-
 	
-	try 
-		run_line()
-	catch e
-		MsgBox % e.message "`n`nError in " e.What ", which was called at line " e.Line "`nPlease contact peter.holz@hotmail.de with this error! (unless you did not configured the program wrong)"
+	if (winactive("ahk_exe "conemuexe))
+		open_c("sumatra",0)
+	else {
+		
+		try 
+			run_line()
+		catch e
+			MsgBox % e.message "`n`nError in " e.What ", which was called at line " e.Line "`nPlease contact peter.holz@hotmail.de with this error! (unless you did not configured the program wrong)"
+	}
 
 return
 
@@ -215,36 +223,36 @@ write_std_settings(n) {
 	std_sumatrapathexe := "C:\Program Files\SumatraPDF\SumatraPDF.exe"
 
 	if (n=1 or n=0)
-		iniwrite, %std_shortcut_waittime%, optionsv2.ini, settings, shortcut_waittime
+		iniwrite, %std_shortcut_waittime%, %inifile%, settings, shortcut_waittime
 	if (n=2 or n=0)
-		iniwrite, %std_conemu_waittime%, optionsv2.ini, settings, conemu_waittime
+		iniwrite, %std_conemu_waittime%, %inifile%, settings, conemu_waittime
 	
 	if (n=3 or n=0)
-		iniwrite, %std_conemupathexe%, optionsv2.ini, settings, conemu64_path_exe
+		iniwrite, %std_conemupathexe%, %inifile%, settings, conemu64_path_exe
 	
 	if (n=4 or n=0)
-		iniwrite, %std_sumatrapathexe%, optionsv2.ini, settings, SumatraPDF_path_exe
+		iniwrite, %std_sumatrapathexe%, %inifile%, settings, SumatraPDF_path_exe
 }
 
 settingsread() {
 	global
 	
-	if !FileExist("optionsv2.ini") 
+	if !FileExist(inifile) 
 		write_std_settings(0) 
 	
-	iniread, conemupathexe, optionsv2.ini, settings, conemu64_path_exe
-	iniread, sumatrapathexe, optionsv2.ini, settings, SumatraPDF_path_exe
+	iniread, conemupathexe, %inifile%, settings, conemu64_path_exe
+	iniread, sumatrapathexe, %inifile%, settings, SumatraPDF_path_exe
 	
 	if (check_program_availability()=false) {
-		iniwrite, %conemupathexe%, optionsv2.ini, settings, conemu64_path_exe
-		iniwrite, %sumatrapathexe%, optionsv2.ini, settings, SumatraPDF_path_exe
+		iniwrite, %conemupathexe%, %inifile%, settings, conemu64_path_exe
+		iniwrite, %sumatrapathexe%, %inifile%, settings, SumatraPDF_path_exe
 	}
 	
-	iniread, shortcut_ms, optionsv2.ini ,settings , shortcut_waittime ;generelle funktion ür iniread mit entsprechendem fehler
+	iniread, shortcut_ms, %inifile% ,settings , shortcut_waittime ;generelle funktion ür iniread mit entsprechendem fehler
 	if (shortcut_ms = "ERROR")
 		write_std_settings(1)
 
-	iniread, conemu_ms, optionsv2.ini ,settings , conemu_waittime
+	iniread, conemu_ms, %inifile% ,settings , conemu_waittime
 	if (conemu_ms = "ERROR") 
 		write_std_settings(2)
 	
@@ -265,6 +273,8 @@ check_program_availability() {
 		FileSelectFile, conemupathexe, 1,  %conemupathexe% , select your ConEmu64.exe path., Executables (*.exe)
 	}
 	conemuexe := SubStr(conemupathexe, InStr(conemupathexe, "\", false, 0, 1)+1 , strlen(conemupathexe))
+	
+	;DAUERT SEHR LANGE BIS SICH DIE PROMPTS ÖFFNEN 
 
 	;sumatra
 	if !FileExist(sumatrapathexe) {
