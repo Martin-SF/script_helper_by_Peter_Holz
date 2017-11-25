@@ -12,7 +12,7 @@ SetControlDelay -1
 SetMouseDelay -1
 SetDefaultMouseSpeed, 0
 
-version := "v1.0-beta_3"
+version := "v1.0-beta_3.0.1"
 inipath := A_AppData "\script_helper\"
 FileCreateDir, %inipath%
 SetWorkingDir, %inipath%
