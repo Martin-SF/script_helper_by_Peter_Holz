@@ -27,12 +27,9 @@ check_updates(ver) {
 	global githubversiontxt
 	URLDownloadToFile, %githubversiontxt% , %A_Temp%\version.txt 
 	IniRead, dwnv , %A_Temp%\version.txt , version, version
-	msgbox % ver . "   " . dwnv
-	Clipboard =%A_Temp%\version.txt
-	if (dwnv != ver) {
+	if (Errorlevel != 1 and dwnv != ver) {
 			Gui, Add, Link, x22 y9 w410 h160 +Center, New Version is out! (Your version: %ver%  latest: %dwnv%)`n`nDownload:`n <a href="https://github.com/Martin-SF/script_helper_by_Peter_Holz/releases">https://github.com/Martin-SF/script_helper_by_Peter_Holz/releases</a>     `n`nmade by peterholz donate:`n<a href="https://www.paypal.me/peterholz1">https://www.paypal.me/peterholz1</a>
-		; Generated using SmartGUI Creator for SciTE
-		Gui, Show, w450 h187, Update Notification - Script Helper by Peter Holz
+		Gui, Show, w450 h187, Update Notification
 	}
 }
 
