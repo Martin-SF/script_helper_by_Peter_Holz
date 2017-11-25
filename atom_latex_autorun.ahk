@@ -5,19 +5,39 @@ ListLines Off
 #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 
+
 sendmode input ;schnelligkeit erhöhen
 SetWinDelay -1
 SetControlDelay -1
 SetMouseDelay -1
 SetDefaultMouseSpeed, 0
 
-version := 1.0.8
+version := "1.0.8"
 inipath := A_AppData "\script_helper\"
 FileCreateDir, %inipath%
 SetWorkingDir, %inipath%
 inifile := "optionsv2.ini"
+githubversiontxt := "https://raw.githubusercontent.com/Martin-SF/script_helper_by_Peter_Holz/master/version.txt"
 
 settingsread()
+check_updates(version)
+return
+
+check_updates(ver) {
+	global githubversiontxt
+	URLDownloadToFile, %githubversiontxt% , %A_Temp%\version.txt 
+	IniRead, dwnv , %A_Temp%\version.txt , version, version
+	msgbox % ver . "   " . dwnv
+	Clipboard =%A_Temp%\version.txt
+	if (dwnv != ver) {
+			Gui, Add, Link, x22 y9 w410 h160 +Center, New Version is out! (Your version: %ver%  latest: %dwnv%)`n`nDownload:`n <a href="https://github.com/Martin-SF/script_helper_by_Peter_Holz/releases">https://github.com/Martin-SF/script_helper_by_Peter_Holz/releases</a>     `n`nmade by peterholz donate:`n<a href="https://www.paypal.me/peterholz1">https://www.paypal.me/peterholz1</a>
+		; Generated using SmartGUI Creator for SciTE
+		Gui, Show, w450 h187, Update Notification - Script Helper by Peter Holz
+	}
+}
+
+GuiClose:
+gui, destroy
 return
 
 ^4::
@@ -59,9 +79,9 @@ return
 
 
 run_line() {
-	global
 	;MAKE BENUTZEN
 	;settingsread()
+	global shortcut_ms
 	
 	keys_save_texteditor(shortcut_ms)
 	
@@ -128,9 +148,8 @@ get_scripttype(scriptname) {
 
 open_c(program,path) {
 	
-	global ;programme starparam übergeben : path 
-	
-	;SetWorkingDir, %path%
+	;programme starparam übergeben : path 
+	global conemuexe, conemupathexe, sumatraexe, sumatrapathexe, conemu_ms
 	
 	if (program = "conemu") {
 		programexe := conemuexe
@@ -151,7 +170,7 @@ open_c(program,path) {
 		
 		if (program = "conemu") {
 			
-			title := "ConEmu 170910 [64]"
+			static title := "ConEmu 170910 [64]"
 			c := A_TickCount
 			while (title = "ConEmu 170910 [64]" or title = "conemu-msys2-64") {
 				WinGetTitle, title, A
@@ -168,22 +187,24 @@ open_c(program,path) {
 	;SetWorkingDir %A_ScriptDir%
 }
 
-get_scriptfullpath_atom() {
+get_scriptfullpath_atom(ms := "-1") {
 	clip := Clipboard
+	global shortcut_ms
+	if (ms = -1)
+		ms := shortcut_ms
 	
 	clipboard = ; Empty the clipboard
-	keys_get_filedest(shortcut_ms)
+	keys_get_filedest(ms)
 	ClipWait, 3
 	if ErrorLevel
 		throw Exception("clipboard error")
-	scriptfullpath := Clipboard
+	f_scriptfullpath := Clipboard
 	
 	Clipboard := clip
-	return scriptfullpath
+	return f_scriptfullpath
 }
 
 keys_close_run_npp() {
-	
 	sendinput {tab down}
 	sendinput {tab up}
 	
@@ -198,6 +219,9 @@ keys_close_run_npp() {
 }
 
 keys_save_texteditor(ms) {
+	global shortcut_ms
+	if (ms = -1)
+		ms := shortcut_ms
 	sendinput {Lcontrol down}
 	sendinput {s down}
 	sleep ms
@@ -206,6 +230,9 @@ keys_save_texteditor(ms) {
 }
 
 keys_get_filedest(ms) {
+	global shortcut_ms
+	if (ms = -1)
+		ms := shortcut_ms
 	sendinput {Lcontrol down}
 	sendinput {shift down}
 	sendinput {c down}
@@ -216,6 +243,7 @@ keys_get_filedest(ms) {
 }
 
 write_std_settings(n) {
+	global inifile
 	
 	std_shortcut_waittime := 100
 	std_conemu_waittime := 5000
@@ -235,7 +263,7 @@ write_std_settings(n) {
 }
 
 settingsread() {
-	global
+	global conemupathexe, sumatrapathexe, shortcut_ms, conemu_ms, inifile
 	
 	if !FileExist(inifile) 
 		write_std_settings(0) 
@@ -259,8 +287,8 @@ settingsread() {
 }
 
 check_program_availability() {
-	global
 	
+	global conemupathexe, sumatrapathexe
 	boo := true
 	; CONEMU	
 	if (A_Is64bitOS=0) 
@@ -272,7 +300,7 @@ check_program_availability() {
 		MsgBox, 32, , Please select the conemu64.exe path. `n`n(it will show a window after clicking ok)
 		FileSelectFile, conemupathexe, 1,  %conemupathexe% , select your ConEmu64.exe path., Executables (*.exe)
 	}
-	conemuexe := SubStr(conemupathexe, InStr(conemupathexe, "\", false, 0, 1)+1 , strlen(conemupathexe))
+	global conemuexe := SubStr(conemupathexe, InStr(conemupathexe, "\", false, 0, 1)+1 , strlen(conemupathexe))
 	
 	;DAUERT SEHR LANGE BIS SICH DIE PROMPTS ÖFFNEN 
 
@@ -282,7 +310,7 @@ check_program_availability() {
 		MsgBox, 32, , Please select the sumatraPDF.exe path. `n`n(it will show a window after clicking ok)
 		FileSelectFile, sumatrapathexe, 1, %sumatrapathexe% , select your sumatraPDF.exe path., Executables (*.exe)
 	}
-	sumatraexe := SubStr(sumatrapathexe, InStr(sumatrapathexe, "\", false, 0, 1)+1 , strlen(sumatrapathexe))
+	global sumatraexe := SubStr(sumatrapathexe, InStr(sumatrapathexe, "\", false, 0, 1)+1 , strlen(sumatrapathexe))
 		
 	;atom
 	
