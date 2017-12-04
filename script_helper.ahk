@@ -79,7 +79,9 @@ open_c(sumatraexe,sumatrapathexe)
 return
 
 ~f5:: ;f5 nicht blockieren
-
+	if (winactive("ahk_exe SciTE.exe"))
+		exitapp
+	
 	if (winactive("ahk_exe notepad++.exe")) {
 		msgbox, for notepad++ still not stable!
 		return
@@ -120,7 +122,7 @@ run_line() {
 		SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ;scriptname := % """" scriptpath "/" scriptname """"
 	
 	scripttype := get_scripttype(scriptname)
-	SendInput %scripttype% %scriptname%{enter} ;eventl diesen befehl beim starten von conemu als parameter übergeben
+	SendInput {backspace 50} {delete 50} %scripttype% %scriptname%{enter} ;eventl diesen befehl beim starten von conemu als parameter übergeben
 }
 WinGetActiveTitle() {
 	WinGetActiveTitle, out
