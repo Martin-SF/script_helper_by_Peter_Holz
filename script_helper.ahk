@@ -28,6 +28,8 @@ SetDefaultMouseSpeed, 0
 
 - updater kriegt als start parameter url und version.
 
+if (A_IsCompiled=1)
+	Hotkey, *^1, off
 */
 
 inipath := A_AppData "\script_helper\"
@@ -39,6 +41,10 @@ githubversiontxt := "https://raw.githubusercontent.com/Martin-SF/script_helper_b
 
 settingsread()
 check_updates(githubversiontxt)
+return
+
+*^1::
+run, %inipath%
 return
 
 check_updates(verurl) {
@@ -56,11 +62,11 @@ check_updates(verurl) {
 }
 
 GuiClose:
-gui, destroy
-Hotkey, ^4, on
-Hotkey, ^f6, on
-Hotkey, ^5, on
-Hotkey, ~f5, on
+	gui, destroy
+	Hotkey, ^4, on
+	Hotkey, ^f6, on
+	Hotkey, ^5, on
+	Hotkey, ~f5, on
 return
 
 ^4::
@@ -81,7 +87,7 @@ return
 ~f5:: ;f5 nicht blockieren
 	if (winactive("ahk_exe SciTE.exe"))
 		exitapp
-	
+
 	if (winactive("ahk_exe notepad++.exe")) {
 		msgbox, for notepad++ still not stable!
 		return
@@ -89,8 +95,10 @@ return
 	;mehrere texteditoren durchgehen dementsprechend filepath getten modifizieren
 	;die entsprechende methode um alle paramater zu bekommen abhängig vom texteditor machen
 	
-	if (winactive("ahk_exe "conemuexe))
+	if (winactive("ahk_exe "conemuexe)) {
+		clearconsole(1)
 		open_c(sumatraexe,sumatrapathexe)
+	}
 	else if (winactive("ahk_exe atom.exe") or winactive("ahk_exe notepad++.exe") ){
 		try 
 			run_line()
@@ -99,6 +107,29 @@ return
 	}
 
 return
+
+clearconsole(a := 0){
+	global clearmethod
+	if (a=1) {
+		Sendinput {backspace}
+		sleep 0
+	} else {
+		/*
+		it := 30
+		;SendInput {control down} {right %it%} {control up} {shift down} {left} {control down} {left %it%} {shift up} {control up} {del}
+		;mit der selektierung kein löschen mögich ...
+		
+		Send {control down} {right %it%} {backspace 100} {control up}
+		;löscht nicht mit peiltasten hochgeholte befehle....
+		
+		Sendinput _this got cleared by script_helper {enter}
+		*/
+		if (clearmethod=0)
+			sendinput {shift down}{home}{del}{end}{right 2}{del}{shift up}{right 2}{del}{shift up}{backspace 10} ;{enter}
+		else
+			Sendinput {control down}{left 50}{control up}line_defused_by_script_helper{enter}
+	}
+}
 
 
 run_line() {
@@ -110,20 +141,27 @@ run_line() {
 	
 	scriptname := get_scriptname() ;erkennung für notepad ++ nicht fertig run_line nur für atom ausgelegt
 	scriptfullpath := get_scriptfullpath_atom()
-	StringReplace, scriptfullpath, scriptfullpath, \,/ , All
-	scriptpath := SubStr(scriptfullpath, 1 , InStr(scriptfullpath, scriptname)-2)
+	scriptpath := trafo_scriptpath(scriptfullpath, scriptname)
 
 	open_c(conemuexe, conemupathexe, scriptpath)
 	
 	StringReplace, scriptpath, scriptpath, :, , All
 	scriptpath := "/" + scriptpath
+	
 	;error wenn fenster gewechselt wurde
 	if (WinGetActiveTitle() != scriptpath) ;FRAGEN OB WECHSELN ODER NICHT?
 		SendInput cd "%scriptpath%"{enter} ;nur wenn im title von conemu nicht ath steht ;scriptname := % """" scriptpath "/" scriptname """"
 	
 	scripttype := get_scripttype(scriptname)
-	SendInput {backspace 50} {delete 50} %scripttype% %scriptname%{enter} ;eventl diesen befehl beim starten von conemu als parameter übergeben
+	
+	SendInput %scripttype% %scriptname%{enter} ;eventl diesen befehl beim starten von conemu als parameter übergeben
 }
+
+trafo_scriptpath(s,d) {
+	StringReplace, s, s, \,/ , All
+	return SubStr(s, 1 , InStr(s, d)-2)
+}
+
 WinGetActiveTitle() {
 	WinGetActiveTitle, out
 	return out
@@ -174,10 +212,11 @@ open_c(programexe, programpathexe, path := "") {
 	;programme starparam übergeben : path 
 	global conemu_ms
 	p := 0
+	newstarted := 0
 	
 	if (InStr(programexe, "conemu")) {
 		programpathexe .= " -here /single -run {Bash::Msys2-64}"
-		p := "c"
+		p := 1
 	}
 	
 	/*
@@ -187,23 +226,27 @@ open_c(programexe, programpathexe, path := "") {
 		
 	process, exist, %programexe%
 	if (errorlevel=0) {
+		newstarted := 1
 		run, %programpathexe%, %path%
 		WinWaitActive, ahk_exe %programexe%
 		
-		if (p = "c") {
+		if (p = 1) {
 			static title := "ConEmu 170910 [64]"
 			c := A_TickCount
 			while (title = "ConEmu 170910 [64]" or title = "conemu-msys2-64") {
 				WinGetTitle, title, A
 				sleep 0
-				if (A_TickCount-c>=conemu_ms)  ;if (A_TickCount-c>=conemu_ms) {
-					throw Exception("your pc is very slow. increase conemu_waittime! (in optionsv2.ini") ;message wird nicht im enddialog benutzt ändern
+				if (A_TickCount-c >= conemu_ms)  ;if (A_TickCount-c>=conemu_ms) {
+					throw Exception("your pc is very slow. increase conemu_waittime! (in %APPDATA%\script_helper\optionsv2.ini") ;message wird nicht im enddialog benutzt ändern
 			}
 		}
 	}
 	
 	WinActivate, ahk_exe %programexe% ;TIMEOUTS
 	WinWaitActive, ahk_exe %programexe%
+	if (newstarted = 0 and p = 1) {
+		clearconsole()
+	}
 }
 
 get_scriptfullpath_atom(ms := "-1") {
@@ -224,41 +267,27 @@ get_scriptfullpath_atom(ms := "-1") {
 }
 
 keys_close_run_npp() {
-	sendinput {tab down}
-	sendinput {tab up}
-	
-	sendinput {tab down}
-	sendinput {tab up}
-	
-	sendinput {tab down}
-	sendinput {tab up}
-	
-	Sendinput {enter down}
-	Sendinput {enter up}
+	loop 3
+		sendinput {tab down} {tab up}
+	Sendinput {enter down} {enter up}
 }
 
 keys_save_texteditor(ms) {
 	global shortcut_ms
 	if (ms = -1)
 		ms := shortcut_ms
-	sendinput {Lcontrol down}
-	sendinput {s down}
+	sendinput {Lcontrol down}{s down}
 	sleep ms
-	sendinput {s up}
-	sendinput {lcontrol up}
+	sendinput {s up}{lcontrol up}
 }
 
 keys_get_filedest(ms) {
 	global shortcut_ms
 	if (ms = -1)
 		ms := shortcut_ms
-	sendinput {Lcontrol down}
-	sendinput {shift down}
-	sendinput {c down}
+	sendinput {Lcontrol down}{shift down}{c down}
 	sleep ms
-	sendinput {c up}
-	sendinput {shift up}
-	sendinput {lcontrol up}
+	sendinput {c up}{shift up}{lcontrol up}
 }
 
 write_std_settings(n) {
@@ -266,6 +295,7 @@ write_std_settings(n) {
 	
 	std_shortcut_waittime := 100
 	std_conemu_waittime := 5000
+	std_clearmethod := 1
 	std_conemupathexe := "C:\Program Files\ConEmu\ConEmu64.exe"
 	std_sumatrapathexe := "C:\Program Files\SumatraPDF\SumatraPDF.exe"
 
@@ -273,16 +303,16 @@ write_std_settings(n) {
 		iniwrite, %std_shortcut_waittime%, %inifile%, settings, shortcut_waittime
 	if (n=2 or n=0)
 		iniwrite, %std_conemu_waittime%, %inifile%, settings, conemu_waittime
-	
 	if (n=3 or n=0)
 		iniwrite, %std_conemupathexe%, %inifile%, settings, conemu64_path_exe
-	
 	if (n=4 or n=0)
 		iniwrite, %std_sumatrapathexe%, %inifile%, settings, SumatraPDF_path_exe
+	if (n=5 or n=0)
+		iniwrite, %std_clearmethod%, %inifile%, settings, clearing_method_in_conemu
 }
 
 settingsread() {
-	global conemupathexe, sumatrapathexe, shortcut_ms, conemu_ms, inifile
+	global conemupathexe, sumatrapathexe, shortcut_ms, conemu_ms, inifile, clearmethod
 	
 	if !FileExist(inifile) 
 		write_std_settings(0) 
@@ -302,6 +332,10 @@ settingsread() {
 	iniread, conemu_ms, %inifile% ,settings , conemu_waittime
 	if (conemu_ms = "ERROR") 
 		write_std_settings(2)
+	
+	iniread, clearmethod, %inifile% ,settings , clearing_method_in_conemu
+	if (clearmethod = "ERROR") 
+		write_std_settings(5)
 	
 }
 
