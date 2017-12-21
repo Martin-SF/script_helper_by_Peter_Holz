@@ -1,3 +1,13 @@
+/*
+- compilier routine
+	- autom. pushen mit versionsnummer
+	- neue versionsnummer in prompt
+	- automatisch release fenster öffnen
+		- version autom. eintragen
+		- exe autom. hochladen
+		
+*/
+
 ScrName := "script_helper.ahk"
 icon := "quickopen.ico"
 

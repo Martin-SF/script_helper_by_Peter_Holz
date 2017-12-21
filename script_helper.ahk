@@ -1,32 +1,28 @@
-﻿#NoEnv
+﻿{
+#NoEnv
 #SingleInstance force
 SetBatchLines -1
 ListLines Off
-#Warn  ; Enable warnings to assist with detecting common errors.
-SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+#Warn
+SendMode Input
 
 sendmode input ;schnelligkeit erhöhen
 SetWinDelay -1
 SetControlDelay -1
 SetMouseDelay -1
 SetDefaultMouseSpeed, 0
+}
 
 /* ideas section
 - Bei protokoll eine V*.tex suchen und die ausführen anstatt durchführung.tex etc.
 	- oder eine regel anlegen wo das programm einmal fragt nach einer main tex datei
 
-- compilier routine
-	- eigenes symbol
-	- autom. pushen
-	- neue versionsnummer in prompt
-	- automatisch release fenster öffnen
-		- version autom. eintragen
-		- exe autom. hochladen
-
 - F5 in conemu versucht die gestartete .tex datei als pdf zu öffnen wenn vorhanden
-- Der update checker versucht schonb am anfang runterzuladen
+- Der update checker versucht schon am anfang runterzuladen
 
 - updater kriegt als start parameter url und version.
+
+- make benutzen
 
 if (A_IsCompiled=1)
 	Hotkey, *^1, off
@@ -97,6 +93,12 @@ return
 
 	if (winactive("ahk_exe "conemuexe)) {
 		clearconsole(1)
+		/*
+			eine globale variable speichert zuletzte Datei
+			if ("last_var hat Form V*.tex")
+			dann wenn da öffne die V*.tex datei in sumatra
+
+		*/
 		open_c(sumatraexe,sumatrapathexe) ;wenn scripttype tex ist dann .pdf öffnen
 	}
 	else if (winactive("ahk_exe atom.exe") or winactive("ahk_exe notepad++.exe") ){
@@ -133,8 +135,6 @@ clearconsole(a := 0){
 
 
 run_line() {
-	;MAKE BENUTZEN
-	;settingsread()
 	global shortcut_ms, conemuexe, conemupathexe
 
 	keys_save_texteditor(shortcut_ms)
@@ -142,7 +142,13 @@ run_line() {
 	scriptname := get_scriptname() ;erkennung für notepad ++ nicht fertig run_line nur für atom ausgelegt
 	scripttype := get_scripttype(scriptname)
 	scriptfullpath := get_scriptfullpath_atom()
+
 	scriptpath := trafo_scriptpath(scriptfullpath, scriptname)
+
+	/*
+		nach V*.tex suchen und ausführen falls da
+		-> später mit zb. shift+f5 V*.tex ausführen
+	*/
 
 	open_c(conemuexe, conemupathexe, scriptpath)
 
@@ -199,7 +205,7 @@ get_scriptname() {
 
 get_scripttype(scriptname) {
 	if (InStr(scriptname, ".tex"))
-		return "lualatex"
+		return "lualatex --output-directory=build"
 	else if (InStr(scriptname, ".py"))
 		return "python"
 	else
@@ -243,6 +249,7 @@ open_c(programexe, programpathexe, path := "") {
 
 	WinActivate, ahk_exe %programexe% ;TIMEOUTS
 	WinWaitActive, ahk_exe %programexe%
+	sleep 10
 	if (newstarted = 0 and p = 1) {
 		clearconsole()
 	}
