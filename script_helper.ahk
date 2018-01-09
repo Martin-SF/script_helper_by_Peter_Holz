@@ -32,15 +32,12 @@ inipath := A_AppData "\script_helper\"
 FileCreateDir, %inipath%
 SetWorkingDir, %inipath%
 inifile := "optionsv2.ini"
+FileDelete, %A_Temp%\cversion.txt 
 fileinstall, version.txt, %A_Temp%\cversion.txt 
 githubversiontxt := "https://raw.githubusercontent.com/Martin-SF/script_helper_by_Peter_Holz/master/version.txt"
 
 settingsread()
 check_updates(githubversiontxt)
-return
-
-*^1::
-run, %inipath%
 return
 
 check_updates(verurl) {
@@ -65,7 +62,11 @@ GuiClose:
 	Hotkey, ~f5, on
 return
 
-^4::
+*^1::
+run, % inipath . "\" . inifile
+return
+
+^2::
 ListVars
 return
 
@@ -217,7 +218,7 @@ get_scripttype(scriptname) {
 open_c(programexe, programpathexe, path := "") {
 	
 	;programme starparam übergeben : path 
-	global conemu_ms
+	global conemu_ms, send_ms
 	p := 0
 	newstarted := 0
 	
@@ -251,7 +252,7 @@ open_c(programexe, programpathexe, path := "") {
 	
 	WinActivate, ahk_exe %programexe% ;TIMEOUTS
 	WinWaitActive, ahk_exe %programexe%
-	sleep 10
+	sleep send_ms
 	if (newstarted = 0 and p = 1) {
 		clearconsole()
 	}
@@ -302,6 +303,7 @@ write_std_settings(n) {
 	global inifile
 	
 	std_shortcut_waittime := 100
+	std_send_ms := 50
 	std_conemu_waittime := 5000
 	std_clearmethod := 1
 	std_conemupathexe := "C:\Program Files\ConEmu\ConEmu64.exe"
@@ -317,10 +319,13 @@ write_std_settings(n) {
 		iniwrite, %std_sumatrapathexe%, %inifile%, settings, SumatraPDF_path_exe
 	if (n=5 or n=0)
 		iniwrite, %std_clearmethod%, %inifile%, settings, clearing_method_in_conemu
+	if (n=6 or n=0)
+		iniwrite, %std_send_ms%, %inifile%, settings, wait_for_conemu_input_in_ms
+	settingsread()
 }
 
 settingsread() {
-	global conemupathexe, sumatrapathexe, shortcut_ms, conemu_ms, inifile, clearmethod
+	global conemupathexe, sumatrapathexe, shortcut_ms, conemu_ms, inifile, clearmethod, send_ms
 	
 	if !FileExist(inifile) 
 		write_std_settings(0) 
@@ -344,6 +349,10 @@ settingsread() {
 	iniread, clearmethod, %inifile% ,settings , clearing_method_in_conemu
 	if (clearmethod = "ERROR") 
 		write_std_settings(5)
+	
+	iniread, send_ms, %inifile% ,settings , wait_for_conemu_input_in_ms
+	if (send_ms = "ERROR") 
+		write_std_settings(6)
 	
 }
 
