@@ -58,18 +58,16 @@ check_updates(verurl) {
 	IniRead, dwnv , %A_Temp%\version.txt , version, version
 	IniRead, ver , %A_Temp%\cversion.txt , version, version
 	if (Errorlevel != 1 and dwnv != ver) {
-		Hotkey, ^4, off
 		Hotkey, ^f6, off
 		Hotkey, ^5, off
 		Hotkey, ~f5, off
-			Gui, Add, Link, x22 y9 w410 h160 +Center, New Version is out! (Your version: %ver%  latest: %dwnv%)`n`nDownload:`n <a href="https://github.com/Martin-SF/script_helper_by_Peter_Holz/releases">https://github.com/Martin-SF/script_helper_by_Peter_Holz/releases</a>     `n`nmade by peterholz donate:`n<a href="https://www.paypal.me/peterholz1">https://www.paypal.me/peterholz1</a>
+			Gui, Add, Link, x22 y9 w410 h160 +Center, New Version is out! (Your version: %ver%  latest: %dwnv%)`n`nDownload:`n <a href="https://github.com/Martin-SF/script_helper_by_Peter_Holz/releases">https://github.com/Martin-SF/script_helper_by_Peter_Holz/releases</a>     `n`nmade by peterholz donate:`n<a href="https://www.paypal.me/peterholz1">paypal.me/peterholz1</a>
 		Gui, Show, w450 h187, Update Notification - Script Helper by Peter Holz
 	}
 }
 
 GuiClose:
 	gui, destroy
-	Hotkey, ^4, on
 	Hotkey, ^f6, on
 	Hotkey, ^5, on
 	Hotkey, ~f5, on
@@ -124,30 +122,6 @@ return
 
 return
 
-clearconsole(a := 0){
-	global clearmethod
-	if (a=1) {
-		Sendinput {backspace}
-		sleep 0
-	} else {
-		/*
-		it := 30
-		;SendInput {control down} {right %it%} {control up} {shift down} {left} {control down} {left %it%} {shift up} {control up} {del}
-		;mit der selektierung kein löschen mögich ...
-		
-		Send {control down} {right %it%} {backspace 100} {control up}
-		;löscht nicht mit peiltasten hochgeholte befehle....
-		
-		Sendinput _this got cleared by script_helper {enter}
-		*/
-		if (clearmethod=0)
-			sendinput {shift down}{home}{del}{end}{right 2}{del}{shift up}{right 2}{del}{shift up}{backspace 10} ;{enter}
-		else
-			Sendinput {control down}{left 50}{control up}line_defused_by_script_helper{enter}
-	}
-}
-
-
 run_line() {
 	global shortcut_ms, conemuexe, conemupathexe
 	
@@ -172,7 +146,7 @@ run_line() {
 	;nachfolgenden bereich aktiv unterstützen, dass keine fehler bei eingabe passieren
 	
 	;error wenn fenster gewechselt wurde
-	if (WinGetActiveTitle() != scriptpath) ;FRAGEN OB WECHSELN ODER NICHT?
+	if (WinGetActiveTitle() != scriptpath) ;FRAGEN OB verz. WECHSELN ODER NICHT?
 		SendInput cd "%scriptpath%"; ;nur wenn im title von conemu nicht ath steht ;scriptname := % """" scriptpath "/" scriptname """"
 	
 	SendInput %scripttype% %scriptname%{enter} ;eventl diesen befehl beim starten von conemu als parameter übergeben
@@ -184,8 +158,33 @@ trafo_scriptpath(s,d) {
 }
 
 WinGetActiveTitle() {
-	WinGetActiveTitle, out
-	return out
+	WinGetActiveTitle, s
+	return s
+}
+
+clearconsole(a := 0){
+	global clearmethod
+	if (a=1) {
+		Sendinput {backspace}
+		sleep 0
+	} else {
+		/*
+		it := 30
+		;SendInput {control down} {right %it%} {control up} {shift down} {left} {control down} {left %it%} {shift up} {control up} {del}
+		;mit der selektierung kein löschen mögich ...
+		
+		Send {control down} {right %it%} {backspace 100} {control up}
+		;löscht nicht mit peiltasten hochgeholte befehle....
+		
+		Sendinput _this got cleared by script_helper {enter}
+		*/
+		if (clearmethod=0)
+			sendinput {shift down}{home}{del}{end}{right 2}{del}{shift up}{right 2}{del}{shift up}{backspace 10} ;{enter}
+		else if (clearmethod=1)
+			Sendinput {control down}c{control up} ;müsste gleichzeitig alle build dateien aufräumen damit keine komischen fehelr auftreten
+		else if (clearmethod=2)
+			Sendinput {control down}{left 50}{control up}line_defused_by_script_helper{enter}
+	}	
 }
 
 get_scriptname() {
