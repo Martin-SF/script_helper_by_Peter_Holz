@@ -26,6 +26,19 @@ SetDefaultMouseSpeed, 0
 
 if (A_IsCompiled=1)
 	Hotkey, *^1, off
+	
+- ein [ settimer label / beim start ] was anderen instanzen / versioen beendet.
+	
+- den build order erstellen falls nicht vorhanden
+
+- einfügen crtl v anstatt sendinput
+
+- compilier fehler erkennen und mit ctrl + z ausführung beenden
+
+- beim starten meistens fehler! anfang abgeschnitten
+
+- extra modus mit f5: es werden noch diese befehle nachher ausgeführt:
+	cd build; biber V201; cd ..; lualatex...
 */
 
 inipath := A_AppData "\script_helper\"
