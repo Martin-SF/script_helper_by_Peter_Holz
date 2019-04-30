@@ -1,6 +1,6 @@
-bk\
-old_code\
-releases\
+bk/
+old_code/
+releases/
 *.exe
 *.bak
 *.ini
