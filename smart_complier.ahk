@@ -5,6 +5,8 @@
 	- automatisch release fenster öffnen
 		- version autom. eintragen
 		- exe autom. hochladen
+	
+	- zugehörige script version dazukopieren (bzw. sollte ja auf github sein
 		
 */
 
