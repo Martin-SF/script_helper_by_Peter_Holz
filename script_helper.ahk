@@ -16,6 +16,8 @@ SetDefaultMouseSpeed, 0
 /* ideas section
 - Bei protokoll eine V*.tex suchen und die ausführen anstatt durchführung.tex etc.
 	- oder eine regel anlegen wo das programm einmal fragt nach einer main tex datei
+	- NEU: einfach Ordner V* suchen und diesen nehmen (nach struktur V*/latex suchen und entsprechen suchpositionen nutzen um V505 zb. rauszufiltern.
+		dann, wenn im "latex" (vielleicht allgemeiner bestimmen?, das man einmal gefragt wird ob lieber V505.tex anstatt auswertung.tex gemacht werden soll, das wird gespeichert unter neuer ini datei sektion.
 	
 - F5 in conemu versucht die gestartete .tex datei als pdf zu öffnen wenn vorhanden
 - Der update checker versucht schon am anfang runterzuladen
@@ -39,24 +41,55 @@ if (A_IsCompiled=1)
 
 - extra modus mit f5: es werden noch diese befehle nachher ausgeführt:
 	cd build; biber V201; cd ..; lualatex...
+	ODER: ordentliche make-file
+	
+- permanente kontroll Gui und hotkey gui (info was was ist.) 
+	- kann minimiert werden in taskleiste
+	- gibt permanentes "update" textfeld mit allen bisheringen update fenster sachen.
+	- beim start tooltip mit information update
+	
+- alle funktionen wie keys_save_texteditor(ms), wo ein standard werd genommen wird bei bestimmten einganeparametern 
+	->  keys_save_texteditor(ms := global shortcut_ms)
+
+- hotkey um gecrashtes latex automatisch neuzukompilieren (X, strg+c dann pfeil nach oben und enter) alles wenn conemu an ist.
+
+- wenn makefile da ist, diesen ausführen. (eine meldung für fragen nach standard prozedur fragen.
+
+- rechtsklick auf icon ermöglichs das update checken.
+
+- anhand der letzten eingabe erkennen ob er "X" wegen latex benutzen muss zum schliessen
+
+
+//// BUGS:
+
+- Konsole erkennt befehle nicht weil sie nur teilweise da stehen. -> eingabezeiten verändern.
+- nach drücken von f5 wird console geöffnet und dann schließt sie sich. (eventuell das schließen erkenen und automatisch 
+	neu starten, bzw. in verdacht stehende parameter überwachen und in spezielle datei schreiben
+	
+	
+	
+////	changelog bisher:
+
+- vor strg+c wird ein X gesendet um eventuelle Latex compilierungen ordentlich zu stoppen.
+
 */
 
 inipath := A_AppData "\script_helper\"
 FileCreateDir, %inipath%
 SetWorkingDir, %inipath%
 inifile := "optionsv2.ini"
-FileDelete, %A_Temp%\cversion.txt 
-fileinstall, version.txt, %A_Temp%\cversion.txt 
-githubversiontxt := "https://raw.githubusercontent.com/Martin-SF/script_helper_by_Peter_Holz/master/version.txt"
+FileDelete, %A_Temp%\script_version.txt 
+fileinstall, version.txt, %A_Temp%\script_version.txt 
+version_txt_url := "https://raw.githubusercontent.com/Martin-SF/script_helper_by_Peter_Holz/master/version.txt"
 
 settingsread()
-check_updates(githubversiontxt)
+check_updates(version_txt_url)
 return
 
 check_updates(verurl) {
-	URLDownloadToFile, %verurl% , %A_Temp%\version.txt
-	IniRead, dwnv , %A_Temp%\version.txt , version, version
-	IniRead, ver , %A_Temp%\cversion.txt , version, version
+	URLDownloadToFile, %verurl% , %A_Temp%\current_version.txt
+	IniRead, dwnv , %A_Temp%\current_version.txt , version, version
+	IniRead, ver , %A_Temp%\script_version.txt , version, version
 	if (Errorlevel != 1 and dwnv != ver) {
 		Hotkey, ^f6, off
 		Hotkey, ^5, off
@@ -122,6 +155,7 @@ return
 
 return
 
+
 clearconsole(a := 0){
 	global clearmethod
 	if (a=1) {
@@ -141,12 +175,11 @@ clearconsole(a := 0){
 		if (clearmethod=0)
 			sendinput {shift down}{home}{del}{end}{right 2}{del}{shift up}{right 2}{del}{shift up}{backspace 10} ;{enter}
 		else if (clearmethod=1)
-			Sendinput {control down}c{control up} ;müsste gleichzeitig alle build dateien aufräumen damit keine komischen fehelr auftreten
+			Sendinput X{enter}{control down}c{control up} ;müsste gleichzeitig alle build dateien aufräumen damit keine komischen fehelr auftreten
 		else if (clearmethod=2)
 			Sendinput {control down}{left 50}{control up}line_defused_by_script_helper{enter}
 	}	
 }
-
 
 run_line() {
 	global shortcut_ms, conemuexe, conemupathexe
@@ -187,6 +220,7 @@ WinGetActiveTitle() {
 	WinGetActiveTitle, s
 	return s
 }
+
 
 get_scriptname() {
 	WinGetTitle, title, A
@@ -294,7 +328,7 @@ keys_close_run_npp() {
 	Sendinput {enter down} {enter up}
 }
 
-keys_save_texteditor(ms) {
+keys_save_texteditor(ms) { ;idee(gilt für alle anderen auch):  keys_save_texteditor(ms := global shortcut_ms)
 	global shortcut_ms
 	if (ms = -1)
 		ms := shortcut_ms
